@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../api/api";
-import useAuth from "../context/useAuth";
+import API from "../../api/api";
+import useAuth from "../../context/useAuth";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+
+Input;
 
 const Login = () => {
-
   const navigate = useNavigate();
   const { token, user, login } = useAuth();
 
@@ -16,7 +19,6 @@ const Login = () => {
 
   // Redirect already logged-in users
   useEffect(() => {
-
     if (token && user) {
       if (user.role === "ADMIN") {
         navigate("/admin");
@@ -24,7 +26,6 @@ const Login = () => {
         navigate("/student");
       }
     }
-
   }, [token, user, navigate]);
 
   const handleSubmit = async (e) => {
@@ -54,14 +55,10 @@ const Login = () => {
       } else {
         navigate("/student");
       }
-
     } catch (err) {
-
-      const message =
-        err.response?.data?.message || "Login failed";
+      const message = err.response?.data?.message || "Login failed";
 
       setError(message);
-
     } finally {
       setLoading(false);
     }
@@ -69,48 +66,48 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-
       <form
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm"
       >
+        <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
 
-        <h2 className="text-xl font-bold mb-4 text-center">
-          Login
-        </h2>
+        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 
-        {error && (
-          <p className="text-red-500 text-sm mb-3">
-            {error}
-          </p>
-        )}
-
-        <input
+        <Input
           type="email"
           placeholder="Email"
-          className="w-full p-2 border rounded mb-3"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        <input
+        <Input
           type="password"
           placeholder="Password"
-          className="w-full p-2 border rounded mb-4"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        <p
+          onClick={() => navigate("/forgot-password")}
+          className="text-sm text-blue-600 cursor-pointer mb-3"
         >
-          {loading ? "Logging in..." : "Login"}
-        </button>
+          Forgot Password?
+        </p>
 
+        <Button type="submit" loading={loading}>
+          Login
+        </Button>
+        <p className="text-sm text-center mt-3">
+          Don't have an account?{" "}
+          <span
+            onClick={() => navigate("/register")}
+            className="text-blue-600 cursor-pointer"
+          >
+            Register
+          </span>
+        </p>
       </form>
-
     </div>
   );
 };
