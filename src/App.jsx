@@ -8,6 +8,11 @@ import Register from "./pages/auth/Register";
 import VerifyOtp from "./pages/auth/VerifyOtp";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+import AdminLayout from "./layouts/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import CreateEvent from "./pages/admin/CreateEvent";
+import EventStats from "./pages/admin/EventStats";
+import LiveEntries from "./pages/admin/LiveEntries";
 
 function App() {
   return (
@@ -40,11 +45,17 @@ function App() {
           element={
             <ProtectedRoute>
               <RoleRoute role="ADMIN">
-                <div>Admin Dashboard</div>
+                <AdminLayout />
               </RoleRoute>
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="create-event" element={<CreateEvent />} />
+          <Route path="stats" element={<EventStats />} />
+          <Route path="entries" element={<LiveEntries />} />
+
+        </Route>
       </Routes>
     </BrowserRouter>
   );
