@@ -13,13 +13,17 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import CreateEvent from "./pages/admin/CreateEvent";
 import EventStats from "./pages/admin/EventStats";
 import LiveEntries from "./pages/admin/LiveEntries";
+import Home from "./pages/public/Home";
+import StudentLayout from "./layouts/StudentLayout";
+import ScanEntry from "./pages/admin/ScanEntry";
+import Help from "./pages/common/Help";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Public */}
-        <Route path="/" element={<div>Home</div>} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
@@ -27,17 +31,22 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
+        
         {/* Student */}
         <Route
           path="/student"
           element={
             <ProtectedRoute>
               <RoleRoute role="STUDENT">
-                <StudentDashboard />
+                <StudentLayout />
               </RoleRoute>
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<StudentDashboard />} />
+          {/* <Route path="dashboard" element={<StudentDashboard />} /> */}
+          <Route path="help" element={<Help role="STUDENT" />} />
+        </Route>
 
         {/* Admin */}
         <Route
@@ -54,7 +63,8 @@ function App() {
           <Route path="create-event" element={<CreateEvent />} />
           <Route path="stats" element={<EventStats />} />
           <Route path="entries" element={<LiveEntries />} />
-
+          <Route path="scan" element={<ScanEntry />} /> 
+          <Route path="help" element={<Help role="ADMIN" />} />
         </Route>
       </Routes>
     </BrowserRouter>
