@@ -1,4 +1,58 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  @apply bg-gray-100 text-gray-900 antialiased transition-colors duration-300;
+}
+
+.dark body {
+  @apply bg-gray-950 text-gray-100;
+}
+
+/* Shared input style */
 .input {
-  @apply w-full p-2 border rounded mb-3;
+  @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 outline-none transition;
+  @apply focus:border-blue-500 focus:ring-2 focus:ring-blue-200;
+  @apply dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-900/40;
+}
+
+/* Shared card */
+.app-card {
+  @apply rounded-xl border border-gray-200 bg-white shadow-sm;
+  @apply dark:border-gray-800 dark:bg-gray-900;
+}
+
+/* Shared page wrapper */
+.app-page {
+  @apply min-h-screen bg-gray-100 text-gray-900 transition-colors duration-300;
+  @apply dark:bg-gray-950 dark:text-gray-100;
+}
+
+/* Shared muted text */
+.app-muted {
+  @apply text-gray-600 dark:text-gray-400;
+}
+
+.btn-primary {
+  @apply rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700;
+  @apply disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+.btn-secondary {
+  @apply rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-800 transition hover:bg-gray-50;
+  @apply dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800;
 }

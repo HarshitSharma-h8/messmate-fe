@@ -1,103 +1,179 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import API from "../../api/api";
+import Button from "../../components/Button";
+
+function fmtDateTime(value) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString();
+}
 
 const EventStats = () => {
-
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await API.get("/admin/event-stats");
+      setData(res.data.data);
+    } catch (err) {
+      const message = err.response?.data?.message || "Failed to load stats";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-
-    const fetchStats = async () => {
-      try {
-        setLoading(true);
-
-        const res = await API.get("/admin/event-stats");
-
-        setData(res.data.data);
-
-      } catch (err) {
-
-        const message =
-          err.response?.data?.message || "Failed to load stats";
-
-        setError(message);
-
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchStats();
-
   }, []);
 
+  const statsCards = useMemo(() => {
+    if (!data?.stats) return [];
+
+    return [
+      {
+        label: "Total Tokens",
+        value: data.stats.totalTokens,
+        className:
+          "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300",
+      },
+      {
+        label: "Used",
+        value: data.stats.usedTokens,
+        className:
+          "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300",
+      },
+      {
+        label: "Unused",
+        value: data.stats.unusedTokens,
+        className:
+          "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300",
+      },
+      {
+        label: "Expired",
+        value: data.stats.expiredTokens,
+        className:
+          "border-red-200 bg-red-50 text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300",
+      },
+    ];
+  }, [data]);
+
   if (loading) {
-    return <p>Loading stats...</p>;
+    return (
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Loading stats...
+        </p>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-red-500">{error}</p>;
+    return (
+      <div className="mx-auto w-full max-w-6xl">
+        <h1 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-gray-100 md:text-3xl">
+          Event Statistics
+        </h1>
+
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+          <div className="font-medium">Could not load stats</div>
+          <div className="mt-1 text-sm">{error}</div>
+        </div>
+
+        <div className="mt-4">
+          <Button type="button" onClick={fetchStats} fullWidth={false}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   const { event, stats } = data;
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-6xl">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 md:text-3xl">
+            Event Statistics
+          </h1>
+          <p className="mt-1 text-gray-600 dark:text-gray-400">
+            Review token distribution and usage for the current event.
+          </p>
+        </div>
 
-      <h1 className="text-2xl font-bold mb-4">
-        Event Statistics
-      </h1>
+        <Button
+          type="button"
+          onClick={fetchStats}
+          variant="secondary"
+          fullWidth={false}
+        >
+          Refresh
+        </Button>
+      </div>
 
       {/* Event Info */}
-      <div className="bg-white p-4 rounded shadow mb-4">
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Active Event
+        </h2>
 
-        <h3 className="font-semibold">
-          {event.title}
-        </h3>
-
-        <p className="text-sm text-gray-600">
-          {new Date(event.startTime).toLocaleString()} -{" "}
-          {new Date(event.endTime).toLocaleString()}
-        </p>
-
+        <div className="mt-3">
+          <div className="text-base font-medium text-gray-900 dark:text-gray-100">
+            {event?.title || "—"}
+          </div>
+          <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            {fmtDateTime(event?.startTime)} - {fmtDateTime(event?.endTime)}
+          </div>
+        </div>
       </div>
 
       {/* Stats Cards */}
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-
-        <div className="bg-blue-100 p-4 rounded">
-          <p className="text-sm">Total Tokens</p>
-          <h2 className="text-xl font-bold">
-            {stats.totalTokens}
-          </h2>
-        </div>
-
-        <div className="bg-green-100 p-4 rounded">
-          <p className="text-sm">Used</p>
-          <h2 className="text-xl font-bold">
-            {stats.usedTokens}
-          </h2>
-        </div>
-
-        <div className="bg-yellow-100 p-4 rounded">
-          <p className="text-sm">Unused</p>
-          <h2 className="text-xl font-bold">
-            {stats.unusedTokens}
-          </h2>
-        </div>
-
-        <div className="bg-red-100 p-4 rounded">
-          <p className="text-sm">Expired</p>
-          <h2 className="text-xl font-bold">
-            {stats.expiredTokens}
-          </h2>
-        </div>
-
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {statsCards.map((item) => (
+          <div
+            key={item.label}
+            className={`rounded-xl border p-4 shadow-sm ${item.className}`}
+          >
+            <p className="text-sm opacity-80">{item.label}</p>
+            <h2 className="mt-2 text-2xl font-bold">{item.value}</h2>
+          </div>
+        ))}
       </div>
 
+      {/* Extra breakdown */}
+      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Quick Breakdown
+        </h3>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Total Tokens
+            </div>
+            <div className="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">
+              {stats?.totalTokens ?? 0}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Processed Tokens
+            </div>
+            <div className="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">
+              {(stats?.usedTokens ?? 0) + (stats?.expiredTokens ?? 0)}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import API from "../../api/api";
 import useAuth from "../../context/useAuth";
 import { QRCodeCanvas } from "qrcode.react";
+import Button from "../../components/Button";
 
 function safeDate(x) {
   const d = x ? new Date(x) : null;
@@ -15,21 +16,25 @@ function fmtDT(x) {
 
 function fmtTime(x) {
   const d = safeDate(x);
-  return d ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
+  return d
+    ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : "—";
 }
 
 function Badge({ children, type = "gray" }) {
   const cls =
     type === "green"
-      ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+      ? "border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
       : type === "red"
-      ? "bg-red-100 text-red-800 border-red-200"
+      ? "border-red-200 bg-red-100 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
       : type === "amber"
-      ? "bg-amber-100 text-amber-800 border-amber-200"
-      : "bg-slate-100 text-slate-800 border-slate-200";
+      ? "border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
+      : "border-slate-200 bg-slate-100 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200";
 
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${cls}`}>
+    <span
+      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${cls}`}
+    >
       {children}
     </span>
   );
@@ -99,6 +104,7 @@ const StudentDashboard = () => {
   const copyTokenId = async () => {
     const tokenId = tokenData?.tokenId;
     if (!tokenId) return;
+
     try {
       await navigator.clipboard.writeText(String(tokenId));
       setNotice("✅ Token ID copied");
@@ -107,9 +113,9 @@ const StudentDashboard = () => {
     }
   };
 
-  // QR payload: includes student details + tokenId (scanner/admin can extract tokenId easily)
   const qrValue = useMemo(() => {
     if (!tokenData?.tokenId) return "";
+
     const payload = {
       tokenId: tokenData.tokenId,
       name: user?.name || "",
@@ -117,227 +123,305 @@ const StudentDashboard = () => {
       degree: user?.degree || "",
       semester: user?.semester || "",
     };
+
     return JSON.stringify(payload);
   }, [tokenData?.tokenId, user]);
 
   if (loading) {
-    return <div className="min-h-screen bg-slate-50 p-6">Loading...</div>;
+    return (
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <p className="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
+      </div>
+    );
   }
 
   if (error && !event) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
-        <div className="mx-auto max-w-4xl">
-          <h1 className="text-2xl font-semibold text-slate-900">Student Dashboard</h1>
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
-            {error}
-          </div>
-          <button
-            onClick={fetchData}
-            className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-          >
+      <div className="mx-auto max-w-4xl">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+          Student Dashboard
+        </h1>
+
+        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+          {error}
+        </div>
+
+        <div className="mt-4">
+          <Button type="button" onClick={fetchData} fullWidth={false}>
             Retry
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <div className="mx-auto w-full max-w-5xl">
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-semibold text-slate-900">
-            Welcome, {user?.name || "Student"}
-          </h1>
-          <p className="mt-1 text-slate-600">
-            Generate your pass and show the QR at the mess entry gate.
-          </p>
+    <div className="mx-auto w-full max-w-6xl">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 md:text-3xl">
+          Welcome, {user?.name || "Student"}
+        </h1>
+        <p className="mt-1 text-gray-600 dark:text-gray-400">
+          Generate your pass and show the QR at the mess entry gate.
+        </p>
+      </div>
+
+      {(error || notice) && (
+        <div
+          className={`mb-6 rounded-xl border p-4 ${
+            error
+              ? "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+              : "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
+          }`}
+        >
+          <div className="font-medium">{error ? "There’s a problem" : "Update"}</div>
+          <div className="mt-1 text-sm">{error || notice}</div>
         </div>
+      )}
 
-        {(error || notice) && (
-          <div
-            className={`mb-6 rounded-xl border p-4 ${
-              error ? "border-red-200 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-800"
-            }`}
-          >
-            <div className="font-medium">{error ? "There’s a problem" : "Update"}</div>
-            <div className="mt-1 text-sm">{error || notice}</div>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        {/* Left column */}
+        <div className="space-y-6 xl:col-span-2">
+          {/* Student Card */}
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Your Details
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  These details appear with your token.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                onClick={fetchData}
+                variant="secondary"
+                fullWidth={false}
+              >
+                Refresh
+              </Button>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 text-sm">
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950">
+                <div className="text-gray-500 dark:text-gray-400">Name</div>
+                <div className="font-semibold text-gray-900 dark:text-gray-100">
+                  {user?.name || "—"}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950">
+                <div className="text-gray-500 dark:text-gray-400">Register Number</div>
+                <div className="font-semibold text-gray-900 dark:text-gray-100">
+                  {user?.registerNumber || user?.regNo || "—"}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950">
+                <div className="text-gray-500 dark:text-gray-400">Degree</div>
+                <div className="font-semibold text-gray-900 dark:text-gray-100">
+                  {user?.degree || "—"}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950">
+                <div className="text-gray-500 dark:text-gray-400">Semester</div>
+                <div className="font-semibold text-gray-900 dark:text-gray-100">
+                  {user?.semester || "—"}
+                </div>
+              </div>
+            </div>
           </div>
-        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left column */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Student Card */}
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Your Details</h2>
-                  <p className="text-sm text-slate-600">These details appear with your token.</p>
-                </div>
-                <button
-                  onClick={fetchData}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100"
-                >
-                  Refresh
-                </button>
+          {/* Event Card */}
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Active Event
+            </h2>
+
+            {!event ? (
+              <div className="mt-3 text-gray-600 dark:text-gray-400">
+                No active event right now.
               </div>
-
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div className="rounded-lg bg-slate-50 p-3 border border-slate-200">
-                  <div className="text-slate-500">Name</div>
-                  <div className="font-semibold text-slate-900">{user?.name || "—"}</div>
-                </div>
-                <div className="rounded-lg bg-slate-50 p-3 border border-slate-200">
-                  <div className="text-slate-500">Register Number</div>
-                  <div className="font-semibold text-slate-900">
-                    {user?.registerNumber || "—"}
-                    {console.log(user)}
+            ) : (
+              <div className="mt-4 space-y-2 text-sm">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                    {event.title}
                   </div>
+                  <Badge>ACTIVE</Badge>
                 </div>
-                <div className="rounded-lg bg-slate-50 p-3 border border-slate-200">
-                  <div className="text-slate-500">Degree</div>
-                  <div className="font-semibold text-slate-900">{user?.degree || "—"}</div>
-                </div>
-                <div className="rounded-lg bg-slate-50 p-3 border border-slate-200">
-                  <div className="text-slate-500">Semester</div>
-                  <div className="font-semibold text-slate-900">{user?.semester || "—"}</div>
+
+                <div className="text-gray-600 dark:text-gray-400">
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                    Window:
+                  </span>{" "}
+                  {fmtDT(event.startTime)} → {fmtDT(event.endTime)}
                 </div>
               </div>
-            </div>
+            )}
+          </div>
 
-            {/* Event Card */}
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">Active Event</h2>
-
-              {!event ? (
-                <div className="mt-3 text-slate-600">No active event right now.</div>
-              ) : (
-                <div className="mt-4 space-y-2 text-sm">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="text-base font-semibold text-slate-900">{event.title}</div>
-                    <Badge>ACTIVE</Badge>
-                  </div>
-                  <div className="text-slate-600">
-                    <span className="font-medium text-slate-700">Window:</span> {fmtDT(event.startTime)} → {fmtDT(event.endTime)}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Token Actions */}
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Your Token</h2>
-                  <p className="text-sm text-slate-600">
-                    Generate only once per active event.
-                  </p>
-                </div>
-
-                {!tokenData ? (
-                  <button
-                    onClick={generateToken}
-                    disabled={actionLoading || !event}
-                    className={`rounded-lg px-4 py-2 text-sm font-semibold text-white ${
-                      actionLoading || !event ? "bg-slate-400 cursor-not-allowed" : "bg-slate-900 hover:bg-slate-800"
-                    }`}
-                  >
-                    {actionLoading ? "Generating..." : "Generate Token"}
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={copyTokenId}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100"
-                    >
-                      Copy Token ID
-                    </button>
-                  </div>
-                )}
+          {/* Token Actions */}
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Your Token
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Generate only once per active event.
+                </p>
               </div>
 
               {!tokenData ? (
-                <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-                  No token generated yet.
-                </div>
+                <Button
+                  type="button"
+                  onClick={generateToken}
+                  disabled={actionLoading || !event}
+                  fullWidth={false}
+                >
+                  {actionLoading ? "Generating..." : "Generate Token"}
+                </Button>
               ) : (
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-sm font-semibold text-slate-900">Token Info</div>
-                      <Badge type={statusBadge.type}>{statusBadge.label}</Badge>
-                    </div>
-
-                    <div className="mt-3 space-y-2 text-sm">
-                      <div className="text-slate-600">
-                        <span className="font-medium text-slate-700">Token ID:</span>{" "}
-                        <span className="font-mono">{tokenData.tokenId}</span>
-                      </div>
-                      <div className="text-slate-600">
-                        <span className="font-medium text-slate-700">Slot:</span>{" "}
-                        {fmtTime(tokenData.slot?.startTime)} → {fmtTime(tokenData.slot?.endTime)}
-                      </div>
-                      <div className="text-slate-600">
-                        <span className="font-medium text-slate-700">Generated:</span>{" "}
-                        {fmtDT(tokenData.generatedAt)}
-                      </div>
-                    </div>
-
-                    <div className="mt-4 text-xs text-slate-500">
-                      Tip: Keep brightness high for fast scanning.
-                    </div>
-                  </div>
-
-                  {/* Gate Pass (QR) */}
-                  <div className="rounded-lg border border-slate-200 bg-white p-4">
-                    <div className="text-sm font-semibold text-slate-900">Gate Pass QR</div>
-                    <div className="mt-3 flex flex-col items-center justify-center gap-3">
-                      <div className="rounded-xl border border-slate-200 bg-white p-3">
-                        <QRCodeCanvas value={qrValue || String(tokenData.tokenId)} size={190} />
-                      </div>
-
-                      <div className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
-                        <div className="font-semibold text-slate-900 mb-1">Student</div>
-                        <div>Name: <span className="font-medium">{user?.name || "—"}</span></div>
-                        <div>Reg No: <span className="font-medium">{user?.registerNumber || user?.regNo || "—"}</span></div>
-                        <div>Degree/Sem: <span className="font-medium">{user?.degree || "—"} / {user?.semester || "—"}</span></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <Button
+                  type="button"
+                  onClick={copyTokenId}
+                  variant="secondary"
+                  fullWidth={false}
+                >
+                  Copy Token ID
+                </Button>
               )}
             </div>
-          </div>
 
-          {/* Right column (sticky summary) */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-6 rounded-xl border bg-white p-5 shadow-sm">
-              <h3 className="text-lg font-semibold text-slate-900">Quick Summary</h3>
-              <div className="mt-3 space-y-3 text-sm text-slate-700">
-                <div>
-                  <div className="text-slate-500">Event</div>
-                  <div className="font-semibold">{event?.title || "—"}</div>
-                </div>
-                <div>
-                  <div className="text-slate-500">Event Window</div>
-                  <div className="font-semibold">{event ? `${fmtTime(event.startTime)} → ${fmtTime(event.endTime)}` : "—"}</div>
-                </div>
-                <div>
-                  <div className="text-slate-500">Token Status</div>
-                  <div className="mt-1">
+            {!tokenData ? (
+              <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300">
+                No token generated yet.
+              </div>
+            ) : (
+              <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      Token Info
+                    </div>
                     <Badge type={statusBadge.type}>{statusBadge.label}</Badge>
                   </div>
+
+                  <div className="mt-3 space-y-2 text-sm">
+                    <div className="break-all text-gray-600 dark:text-gray-400">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                        Token ID:
+                      </span>{" "}
+                      <span className="font-mono">{tokenData.tokenId}</span>
+                    </div>
+
+                    <div className="text-gray-600 dark:text-gray-400">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                        Slot:
+                      </span>{" "}
+                      {fmtTime(tokenData.slot?.startTime)} → {fmtTime(tokenData.slot?.endTime)}
+                    </div>
+
+                    <div className="text-gray-600 dark:text-gray-400">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                        Generated:
+                      </span>{" "}
+                      {fmtDT(tokenData.generatedAt)}
+                    </div>
+
+                    {tokenData.usedAt && (
+                      <div className="text-gray-600 dark:text-gray-400">
+                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                          Used At:
+                        </span>{" "}
+                        {fmtDT(tokenData.usedAt)}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                    Tip: Keep brightness high for fast scanning.
+                  </div>
                 </div>
-                <div className="pt-2 text-xs text-slate-500">
-                  If the scanner can’t read the QR, use “Copy Token ID” and show it to the admin.
+
+                {/* Gate Pass */}
+                <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    Gate Pass QR
+                  </div>
+
+                  <div className="mt-3 flex flex-col items-center justify-center gap-3">
+                    <div className="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-white">
+                      <QRCodeCanvas
+                        value={qrValue || String(tokenData.tokenId)}
+                        size={window.innerWidth < 640 ? 160 : 190}
+                      />
+                    </div>
+
+                    <div className="w-full rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300">
+                      <div className="mb-1 font-semibold text-gray-900 dark:text-gray-100">
+                        Student
+                      </div>
+                      <div>
+                        Name: <span className="font-medium">{user?.name || "—"}</span>
+                      </div>
+                      <div>
+                        Reg No:{" "}
+                        <span className="font-medium">
+                          {user?.registerNumber || user?.regNo || "—"}
+                        </span>
+                      </div>
+                      <div>
+                        Degree/Sem:{" "}
+                        <span className="font-medium">
+                          {user?.degree || "—"} / {user?.semester || "—"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right column */}
+        <div className="xl:col-span-1">
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm xl:sticky xl:top-6 dark:border-gray-800 dark:bg-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Quick Summary
+            </h3>
+
+            <div className="mt-3 space-y-3 text-sm text-gray-700 dark:text-gray-300">
+              <div>
+                <div className="text-gray-500 dark:text-gray-400">Event</div>
+                <div className="font-semibold">{event?.title || "—"}</div>
+              </div>
+
+              <div>
+                <div className="text-gray-500 dark:text-gray-400">Event Window</div>
+                <div className="font-semibold">
+                  {event ? `${fmtTime(event.startTime)} → ${fmtTime(event.endTime)}` : "—"}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-gray-500 dark:text-gray-400">Token Status</div>
+                <div className="mt-1">
+                  <Badge type={statusBadge.type}>{statusBadge.label}</Badge>
+                </div>
+              </div>
+
+              <div className="pt-2 text-xs text-gray-500 dark:text-gray-400">
+                If the scanner can’t read the QR, use “Copy Token ID” and show it to the admin.
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
