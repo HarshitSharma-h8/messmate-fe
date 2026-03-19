@@ -1,151 +1,70 @@
-# 🍽 MessMate – User Guide
+![alt text](./docs/image.png)
+# 🍽️ MessMate – Smart Mess Entry Management System
 
-MessMate is a digital mess entry system.
-
-- 👨‍💼 Admins create events and verify entries at the gate.
-- 🎓 Students generate a token (QR) and show it for entry.
-
----
-
-# 👨‍💼 Admin Guide
-
-## 1️⃣ Login as Admin
-- Go to the login page
-- Enter your registered admin email and password
-- After login, you will see the **Admin Dashboard**
+MessMate is a QR-based token system for managing mess entry efficiently.  
+It eliminates manual verification and enables fast, secure, and trackable access.
 
 ---
 
-## 2️⃣ Create an Event
+## 🚀 Features
 
-1. Go to **Create Event**
-2. Fill in:
-   - Event Title (e.g., Lunch – Boys Mess)
-   - Event Start Time
-   - Event End Time
-3. Add Slots:
-   - Degree (required)
-   - Semester (optional)
-   - Slot Start Time
-   - Slot End Time
-4. Click **Create Event**
+- 🔐 Authentication with OTP
+- 🎟️ QR-based token generation
+- 📷 QR scanning at gate
+- ⛔ Prevent duplicate entries
+- 📊 Admin dashboard with stats
+- 📡 Live entry tracking
 
-Now the event becomes active and students can generate tokens.
+👉 Full details: [Features](docs/FEATURES.md)
 
 ---
 
-## 3️⃣ Scan Student Entry (At Gate)
+## 👥 User Roles
 
-1. Go to **Scan Entry**
-2. Use:
-   - 📷 Camera Scanner (scan QR)
-   - OR enter tokenId manually
-3. System will show:
+### Student
+- Register & Login
+- Generate Token
+- Show QR for entry
 
-   - ✅ Entry Allowed (Green)
-   - ❌ Entry Blocked (Red)
-
-It will also display:
-- Student Name
-- Register Number
-- Degree & Semester
-- Entry Time
-- Event Title
-
-After successful scan:
-- Token becomes **USED**
-- Student cannot enter again
+### Admin
+- Create Event
+- Scan & Verify Entry
+- View Stats & Live Entries
 
 ---
 
-## 4️⃣ View Event Data
+## 🏗️ System Overview
 
-### Event Stats
-- Total tokens generated
-- Total entries
-- Usage data
+MessMate follows a client-server architecture:
 
-### Live Entries
-- Real-time list of students who entered
-- Entry timestamps
+Frontend (React) → Backend (Node/Express) → Database (MongoDB)
+
+👉 Full architecture: [Architecture](docs/ARCHITECTURE.md)
 
 ---
 
-# 🎓 Student Guide
+## 📊 Diagrams
 
-## 1️⃣ Register
+- Use Case Diagram
+- System Architecture
+- ER Diagram
+- Sequence Diagrams
 
-1. Go to **Register**
-2. Select Role: **Student**
-3. Enter:
-   - Name
-   - Register Number
-   - Degree
-   - Semester
-4. Verify OTP sent to your email
-5. Login
+👉 View all diagrams: [Diagrams](docs/DIAGRAMS.md)
 
 ---
 
-## 2️⃣ Generate Token
+## 🔌 API Documentation
 
-1. Go to **Dashboard**
-2. If an event is active:
-   - Click **Generate Token**
-3. Your token will be created
-4. A QR code will be displayed
+👉 View API endpoints: [API Docs](docs/API.md)
 
 ---
 
-## 3️⃣ At the Mess Gate
+## 🖼️ Screenshots
 
-1. Open your Dashboard
-2. Show the QR code to the admin
-3. Admin scans the QR
-4. Entry status will update
-
-If token is used:
-- Status changes to **USED**
-- You cannot use the same token again
-
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
 ---
 
-# 🚦 Entry Rules
-
-- One token per active event
-- Token works only for the assigned event
-- Token becomes invalid after being used
-- Entry allowed only if event is active
-
----
-
-# ⚠ Important Notes
-
-- Keep screen brightness high while showing QR.
-- Do not share your token with others.
-- Token cannot be reused.
-- If QR fails, you can show the tokenId manually.
-
----
-
-# 📌 System Flow (Simple View)
-
-Admin creates Event  
-⬇  
-Student generates Token  
-⬇  
-Student shows QR  
-⬇  
-Admin scans  
-⬇  
-Entry verified  
-
----
-
-# 🎯 Purpose
-
-MessMate helps:
-- Prevent duplicate entries
-- Manage slot-based mess access
-- Track real-time entries
-- Digitize mess operations
